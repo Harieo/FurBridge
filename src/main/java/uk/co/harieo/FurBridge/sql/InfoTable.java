@@ -9,7 +9,7 @@ import java.util.concurrent.CompletableFuture;
 
 public class InfoTable {
 
-	private static Map<String, InfoTable> cache = new HashMap<>();
+	private static Map<String, InfoTable> cache = new HashMap<>(); // Stores instances of this class based on the table name
 
 	private String tableName;
 	private String tableParameters;
@@ -20,6 +20,11 @@ public class InfoTable {
 		cache.put(tableName, this);
 	}
 
+	/**
+	 * Creates a table if the table does not already exist based on the specified name and parameters
+	 *
+	 * @return whether the table was verified as created
+	 */
 	public CompletableFuture<Boolean> createTable() {
 		return CompletableFuture.supplyAsync(() -> {
 			try (Connection connection = FurDB.getConnection();
@@ -35,6 +40,12 @@ public class InfoTable {
 		});
 	}
 
+	/**
+	 * Creates a table but does not check if it already exists, should only be used if there is no doubt the table
+	 * doesn't exist already or else an {@link SQLException} will be thrown
+	 *
+	 * @return whether the table was created successfully
+	 */
 	public CompletableFuture<Boolean> forceCreateTable() {
 		return CompletableFuture.supplyAsync(() -> {
 			try (Connection connection = FurDB.getConnection();
@@ -49,6 +60,13 @@ public class InfoTable {
 		});
 	}
 
+	/**
+	 * Gets an instance of {@link InfoTable} from the cache or creates on if it is not cached
+	 *
+	 * @param tableName of the table
+	 * @param tableParameters of the table
+	 * @return the instance of {@link InfoTable}
+	 */
 	public static InfoTable get(String tableName, String tableParameters) {
 		if (cache.containsKey(tableName)) {
 			return cache.get(tableName);
@@ -57,6 +75,12 @@ public class InfoTable {
 		}
 	}
 
+	/**
+	 * Gets an instance of {@link InfoTable} from the cache but does not create it if it is not cached
+	 *
+	 * @param tableName of the table
+	 * @return the cached {@link InfoTable} instance or null if no instance was found
+	 */
 	public static InfoTable getFromCache(String tableName) {
 		return cache.get(tableName);
 	}

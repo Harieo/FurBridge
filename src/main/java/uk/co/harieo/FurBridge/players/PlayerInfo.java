@@ -27,22 +27,50 @@ public class PlayerInfo {
 		this.successfulLoad = successfulLoad;
 	}
 
+	/**
+	 * @return the unique number given to this player upon registering them
+	 */
 	public int getPlayerId() {
 		return playerId;
 	}
 
+	/**
+	 * @return this player's UUID
+	 */
 	public UUID getUniqueId() {
 		return uuid;
 	}
 
+	/**
+	 * @return the last known name of this player
+	 */
 	public String getName() {
 		return name;
 	}
 
+	/**
+	 * This should always be checked before using any instance of this class. This will return false if an error
+	 * occurred or if the player could not be found. If this does return false, one or more of the other methods will
+	 * return null and should never be used.
+	 *
+	 * @return whether this information was loaded without errors
+	 */
 	public boolean wasSuccessfullyLoaded() {
 		return successfulLoad;
 	}
 
+	/**
+	 * Retrieves a player's information from the database by their {@link UUID} but will NOT add them to the database if
+	 * the information can't be found. Instead, it will return {@link #wasSuccessfullyLoaded()} as false to indicate
+	 * that the information couldn't be found.
+	 *
+	 * It is recommended to always try to use {@link #loadPlayerInfo(String, UUID)} as that will add to the database but
+	 * this method can still be used when needed. However, if you use this method then referencing {@link
+	 * #wasSuccessfullyLoaded()} is a necessity.
+	 *
+	 * @param uuid of the player you are searching for
+	 * @return the retrieved instance of {@link PlayerInfo}
+	 */
 	public static CompletableFuture<PlayerInfo> queryPlayerInfo(UUID uuid) {
 		if (CACHE.getIfPresent(uuid) != null) {
 			return CompletableFuture.completedFuture(CACHE.getIfPresent(uuid));
@@ -70,6 +98,18 @@ public class PlayerInfo {
 		});
 	}
 
+	/**
+	 * Retrieves a player's information from the database by their player name but will NOT add them to the database if
+	 * the information can't be found. Instead, it will return {@link #wasSuccessfullyLoaded()} as false to indicate
+	 * that the information couldn't be found.
+	 *
+	 * It is recommended to always try to use {@link #loadPlayerInfo(String, UUID)} as that will add to the database but
+	 * this method can still be used when needed. However, if you use this method then referencing {@link
+	 * #wasSuccessfullyLoaded()} is a necessity.
+	 *
+	 * @param playerName of the player you are searching for
+	 * @return the retrieved instance of {@link PlayerInfo}
+	 */
 	public static CompletableFuture<PlayerInfo> queryPlayerInfo(String playerName) {
 		return CompletableFuture.supplyAsync(() -> {
 			try (Connection connection = FurDB.getConnection();
@@ -91,6 +131,17 @@ public class PlayerInfo {
 		});
 	}
 
+	/**
+	 * Loads a player's information from the database or creates new information if none already exists. This should be
+	 * used when possible as it registers new players.
+	 *
+	 * This method is most likely to be able to retrieve a full instance of {@link PlayerInfo} but you should still
+	 * reference {@link #wasSuccessfullyLoaded()} as it will show if any errors occurred in loading
+	 *
+	 * @param playerName of the player you're loading information for
+	 * @param uuid of the player you're loading information for
+	 * @return the retrieved instance of {@link PlayerInfo}
+	 */
 	public static CompletableFuture<PlayerInfo> loadPlayerInfo(String playerName, UUID uuid) {
 		if (CACHE.getIfPresent(uuid) != null) {
 			return CompletableFuture.completedFuture(CACHE.getIfPresent(uuid));
@@ -112,7 +163,8 @@ public class PlayerInfo {
 							}
 
 							if (error != null || !success) {
-								System.out.println("An error occurred updating a user's name, system will compensate but this is a severe issue");
+								System.out.println(
+										"An error occurred updating a user's name, system will compensate but this is a severe issue");
 							}
 						});
 					}
@@ -146,6 +198,13 @@ public class PlayerInfo {
 		});
 	}
 
+	/**
+	 * Updates a player's last known name in the database
+	 *
+	 * @param playerId of the player to update the name of
+	 * @param newName to update the record to
+	 * @return whether the update was successful
+	 */
 	private static CompletableFuture<Boolean> updateName(int playerId, String newName) {
 		return CompletableFuture.supplyAsync(() -> {
 			try (Connection connection = FurDB.getConnection();

@@ -11,6 +11,12 @@ public class FurDB {
 	private static final String username = System.getProperty("DatabaseUser", "FurCore");
 	private static final String password = System.getProperty("DatabasePassword");
 
+	/**
+	 * Retrieves a single {@link Connection} to the database based on system properties
+	 *
+	 * @return the open connection
+	 * @throws SQLException which may occur if there is an error opening a connection
+	 */
 	public static Connection getConnection() throws SQLException {
 		Properties properties = new Properties();
 		if (password == null) {

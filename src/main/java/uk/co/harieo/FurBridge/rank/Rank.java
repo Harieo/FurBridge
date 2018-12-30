@@ -23,26 +23,47 @@ public enum Rank {
 		this.color = rankColor;
 	}
 
+	/**
+	 * @return the unique identifier of this rank, used in the database
+	 */
 	public String getId() {
 		return id;
 	}
 
+	/**
+	 * @return the parent rank
+	 */
 	public Rank getParent() {
 		return parent;
 	}
 
+	/**
+	 * @return the prefix of this rank with an appended space to separate it from a player's name
+	 */
 	public String getPrefix() {
 		return prefix + " ";
 	}
 
+	/**
+	 * @return whether this rank has a prefix
+	 */
 	public boolean hasPrefix() {
 		return prefix != null;
 	}
 
-	public ChatColor getColor() {
+	/**
+	 * @return the colour of this rank
+	 */
+	public ChatColor getColour() {
 		return color;
 	}
 
+	/**
+	 * Checks whether this rank is a child of the specified rank
+	 *
+	 * @param compare to check
+	 * @return whether this rank is a child of the specified rank
+	 */
 	public boolean isChild(Rank compare) {
 		return getParent() != null && (getParent() == compare || getParent().isChild(compare));
 	}
@@ -52,6 +73,12 @@ public enum Rank {
 		return getId();
 	}
 
+	/**
+	 * Retrieves the Rank with {@link #getId()} matching the specified string, ignoring case
+	 *
+	 * @param value to compare with all Rank enums
+	 * @return the matching Rank or null if none match
+	 */
 	public static Rank getRankById(String value) {
 		for (Rank rank : values()) {
 			if (rank.getId().equalsIgnoreCase(value.toLowerCase())) {
@@ -62,6 +89,12 @@ public enum Rank {
 		return null;
 	}
 
+	/**
+	 * Serialises a list of ranks into a String based on their {@link #getId()} value
+	 *
+	 * @param ranks to be serialised into a single String
+	 * @return the serialised String
+	 */
 	public static String serialise(List<Rank> ranks) {
 		if (!ranks.isEmpty()) {
 			StringBuilder builder = new StringBuilder(128); // 128 chars is the SQL table capacity
@@ -76,6 +109,12 @@ public enum Rank {
 		}
 	}
 
+	/**
+	 * Deserialises a serialised list of Ranks
+	 *
+	 * @param serialisedString containing a list of ranks
+	 * @return the list of ranks from the serialised string
+	 */
 	public static List<Rank> deserialise(String serialisedString) {
 		List<Rank> list = new ArrayList<>();
 
