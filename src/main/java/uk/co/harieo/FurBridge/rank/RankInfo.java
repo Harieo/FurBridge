@@ -44,7 +44,6 @@ public class RankInfo extends InfoCore {
 			}
 		} catch (SQLException e) {
 			e.printStackTrace();
-
 		}
 	}
 

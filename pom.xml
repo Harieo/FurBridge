@@ -21,11 +21,16 @@
     </repositories>
 
     <dependencies>
+        <!--<dependency>
+            <groupId>com.google.guava</groupId>
+            <artifactId>guava</artifactId>
+            <version>21.0</version>
+            <scope>compile</scope>
+        </dependency>-->
         <dependency>
             <groupId>com.google.guava</groupId>
             <artifactId>guava</artifactId>
-            <version>20.0</version>
-            <scope>compile</scope>
+            <version>21.0</version>
         </dependency>
         <!-- This is used in all relevant server types -->
         <dependency>

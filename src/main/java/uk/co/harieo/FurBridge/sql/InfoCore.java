@@ -12,7 +12,9 @@ public abstract class InfoCore implements DatabaseHandler {
 	protected InfoCore() {
 		try {
 			hasErrorOccurred = !verifyTables().get(); // If success is false, hasErrorOccurred would be true
-			load();
+			if (hasErrorOccurred) {
+				System.out.println("An error occurred verifying the rank tables");
+			}
 		} catch (ExecutionException | InterruptedException e) {
 			e.printStackTrace();
 			hasErrorOccurred = true;
@@ -27,7 +29,7 @@ public abstract class InfoCore implements DatabaseHandler {
 		}
 	}
 
-	protected PlayerInfo getPlayerInfo() {
+	public PlayerInfo getPlayerInfo() {
 		return playerInfo;
 	}
 
@@ -46,6 +48,7 @@ public abstract class InfoCore implements DatabaseHandler {
 			try {
 				T instance = infoClass.newInstance();
 				instance.setPlayerInfo(info);
+				instance.load();
 				return instance;
 			} catch (InstantiationException | IllegalAccessException e) {
 				e.printStackTrace();

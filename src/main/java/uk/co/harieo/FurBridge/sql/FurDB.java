@@ -19,7 +19,7 @@ public class FurDB {
 		properties.put("user", username);
 		properties.put("password", password);
 
-		return DriverManager.getConnection("jdbc:mysql://localhost:3306/" + databaseName, properties);
+		return DriverManager.getConnection("jdbc:mysql://localhost:3306/" + databaseName + "?useSSL=false", properties);
 	}
 
 }

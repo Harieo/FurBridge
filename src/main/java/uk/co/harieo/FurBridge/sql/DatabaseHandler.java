@@ -14,7 +14,7 @@ public interface DatabaseHandler {
 	 * checking the outcome. If any errors occur, the entire cycle will break and the system should be considered
 	 * malfunctioning.
 	 *
-	 * @return whether the call was clear of errors or not and, by extension, whether this class should be used
+	 * @return true if the call was a success or false is an error occurred
 	 */
 	default CompletableFuture<Boolean> verifyTables() {
 		return CompletableFuture.supplyAsync(() -> {
@@ -31,7 +31,7 @@ public interface DatabaseHandler {
 				error = true;
 			}
 
-			return error;
+			return !error; // This will return true on success and false on error
 		});
 	}
 

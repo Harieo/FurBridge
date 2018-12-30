@@ -131,7 +131,7 @@ public class PlayerInfo {
 
 						ResultSet insertResult = insertStatement.getGeneratedKeys();
 						if (insertResult.next()) {
-							PlayerInfo info = new PlayerInfo(result.getInt(1), uuid, playerName, true);
+							PlayerInfo info = new PlayerInfo(insertResult.getInt(1), uuid, playerName, true);
 							CACHE.put(uuid, info);
 							return info;
 						} else {
