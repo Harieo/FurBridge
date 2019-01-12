@@ -8,7 +8,7 @@ import java.util.Properties;
 public class FurDB {
 
 	private static final String databaseName = System.getProperty("DatabaseName", "minecraft");
-	private static final String username = System.getProperty("DatabaseUser", "FurCore");
+	private static final String username = System.getProperty("DatabaseUser");
 	private static final String password = System.getProperty("DatabasePassword");
 
 	/**

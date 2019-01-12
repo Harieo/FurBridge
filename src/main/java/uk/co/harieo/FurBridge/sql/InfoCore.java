@@ -1,5 +1,6 @@
 package uk.co.harieo.FurBridge.sql;
 
+import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
 import uk.co.harieo.FurBridge.players.PlayerInfo;
@@ -30,7 +31,6 @@ public abstract class InfoCore implements DatabaseHandler {
 		this.playerInfo = info;
 		if (!playerInfo.wasSuccessfullyLoaded()) {
 			hasErrorOccurred = true;
-			throw new IllegalArgumentException("Passed a failed PlayerInfo load to an InfoCore");
 		}
 	}
 
@@ -70,20 +70,24 @@ public abstract class InfoCore implements DatabaseHandler {
 	 * Make sure to reference {@link #hasErrorOccurred()} before using custom functions for safety
 	 *
 	 * @param infoClass to retrieve an instance of, which conforms to T
-	 * @param info of the player to load the information of
+	 * @param uuid of the player you are loading information for
 	 * @param <T> extends {@link InfoCore}
 	 * @return the instantiated instance of this class
 	 */
-	public static <T extends InfoCore> CompletableFuture<T> get(Class<T> infoClass, PlayerInfo info) {
+	public static <T extends InfoCore> CompletableFuture<T> get(Class<T> infoClass, UUID uuid) {
 		return CompletableFuture.supplyAsync(() -> {
 			try {
 				T instance = infoClass.newInstance();
-				instance.setPlayerInfo(info);
+				PlayerInfo playerInfo = PlayerInfo.queryPlayerInfo(uuid).get();
+				instance.setPlayerInfo(playerInfo);
 				instance.load();
 				return instance;
 			} catch (InstantiationException | IllegalAccessException e) {
 				e.printStackTrace();
 				throw new RuntimeException("Error occurred instantiating an InfoCore");
+			} catch (ExecutionException | InterruptedException e) {
+				e.printStackTrace();
+				throw new RuntimeException("Error occurred retrieving PlayerInfo for an InfoCore");
 			}
 		});
 	}

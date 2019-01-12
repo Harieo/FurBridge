@@ -7,7 +7,7 @@ import net.md_5.bungee.api.ChatColor;
 public enum Rank {
 
 	GUEST("DEF", null, null, ChatColor.WHITE),
-	PATRON("PAT", GUEST, ChatColor.GOLD + ChatColor.BOLD.toString() + "SUB", ChatColor.GOLD),
+	PATRON("PAT", GUEST, ChatColor.LIGHT_PURPLE + ChatColor.BOLD.toString() + "PATRON", ChatColor.LIGHT_PURPLE),
 	MODERATOR("MOD", PATRON, ChatColor.DARK_GREEN + ChatColor.BOLD.toString() + "MOD", ChatColor.DARK_GREEN),
 	ADMINISTRATOR("ADM", MODERATOR, ChatColor.RED + ChatColor.BOLD.toString() + "ADMIN", ChatColor.RED);
 
