@@ -92,4 +92,30 @@ public abstract class InfoCore implements DatabaseHandler {
 		});
 	}
 
+	/**
+	 * Retrieves an instantiated instance of a class, which extends this class, asynchronously, locally setting necessary
+	 * fields with the provided {@link PlayerInfo} and calling {@link #load()} to load the specified info class. This
+	 * method is used only when {@link UUID} is not available and an alternative {@link PlayerInfo} can be provided.
+	 *
+	 * Make sure to reference {@link #hasErrorOccurred()} before using custom functions for safety.
+	 *
+	 * @param infoClass to retrieve an instance of, which conforms to T
+	 * @param playerInfo of the player you are loading information for
+	 * @param <T> extends {@link InfoCore}
+	 * @return the instantiated instance of this class
+	 */
+	public static <T extends InfoCore> CompletableFuture<T> get(Class<T> infoClass, PlayerInfo playerInfo) {
+		return CompletableFuture.supplyAsync(() -> {
+			try {
+				T instance = infoClass.newInstance();
+				instance.setPlayerInfo(playerInfo);
+				instance.load();
+				return instance;
+			} catch (InstantiationException | IllegalAccessException e) {
+				e.printStackTrace();
+				throw new RuntimeException("Error occurred instantiating an InfoCore");
+			}
+		});
+	}
+
 }
