@@ -123,7 +123,7 @@ public class RankModule {
 			Map<String, Boolean> permissions = new HashMap<>(rank.getPermissions()); // Adds the base rank's permissions
 
 			Rank parent = getRank(rank.getParentRankId());
-			while (parent != null && parent.getParentRankId() >= 0) { // While the next parent exists
+			while (parent != null && parent.getId() >= 0) { // While the next parent exists
 				Map<String, Boolean> parentPermissions = parent.getPermissions();
 				for (String permission : parentPermissions.keySet()) {
 					permissions.putIfAbsent(permission,

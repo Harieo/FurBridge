@@ -11,7 +11,7 @@ import redis.clients.jedis.JedisPoolConfig;
 
 public class RedisClient {
 
-	private static final String path = "/home/container/deployment/redis.properties";
+	private static final String path = "/home/container/deployment-v2/redis.properties";
 	private static Properties properties;
 	private static JedisPool pool;
 

@@ -12,7 +12,7 @@ import java.util.Properties;
 
 public class FurDB {
 
-	private static final String path = "/home/container/deployment/db.json";
+	private static final String path = "/home/container/deployment-v2/db.json";
 	private static Properties properties;
 	private static String database = "minecraft";
 
