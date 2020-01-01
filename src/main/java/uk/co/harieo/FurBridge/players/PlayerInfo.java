@@ -7,6 +7,7 @@ import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.TimeUnit;
 import uk.co.harieo.FurBridge.sql.FurDB;
+import uk.co.harieo.FurBridge.sql.InfoTable;
 
 public class PlayerInfo {
 
@@ -14,6 +15,8 @@ public class PlayerInfo {
 	// Only successfully loaded instances should meet the cache, unsuccessful ones should be reattempted when needed
 	private static Cache<UUID, PlayerInfo> CACHE = CacheBuilder.newBuilder().expireAfterWrite(10, TimeUnit.MINUTES)
 			.build();
+	public static final InfoTable TABLE = InfoTable.get("users",
+			"id int primary key auto_increment, uuid varchar(128) unique key not null, name varchar(64) not null");
 
 	private int playerId;
 	private UUID uuid;
