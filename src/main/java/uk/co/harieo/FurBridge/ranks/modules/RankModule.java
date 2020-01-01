@@ -7,6 +7,7 @@ import java.sql.SQLException;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ExecutionException;
 import uk.co.harieo.FurBridge.ranks.Rank;
 import uk.co.harieo.FurBridge.sql.FurDB;
 import uk.co.harieo.FurBridge.sql.InfoTable;
@@ -151,9 +152,15 @@ public class RankModule {
 	 */
 	public static CompletableFuture<RankModule> loadModule() {
 		return CompletableFuture.supplyAsync(() -> {
-			// Make sure both the required tables exist in the context
-			RANKS_TABLE.createTable();
-			PERMISSIONS_TABLE.createTable();
+			// Make sure both the required tables exist in the context, with blocking to prevent thread issues
+			try {
+				if (!RANKS_TABLE.createTable().get() || !PERMISSIONS_TABLE.createTable().get()) {
+					throw new RuntimeException("Couldn't verify the required tables for the rank module");
+				}
+			} catch (InterruptedException | ExecutionException e) {
+				e.printStackTrace();
+				return createErroneousModule();
+			}
 
 			try (Connection connection = FurDB.getConnection();
 					PreparedStatement statement = connection
