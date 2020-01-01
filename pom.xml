@@ -26,11 +26,6 @@
     </repositories>
 
     <dependencies>
-        <dependency>
-            <groupId>com.google.guava</groupId>
-            <artifactId>guava</artifactId>
-            <version>21.0</version>
-        </dependency>
         <!-- This is used in all relevant server types -->
         <dependency>
             <groupId>net.md-5</groupId>
