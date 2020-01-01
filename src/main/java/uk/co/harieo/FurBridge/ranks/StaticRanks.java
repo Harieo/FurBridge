@@ -5,8 +5,7 @@ public enum StaticRanks {
 	OWNER("ranks.owner"),
 	ADMIN("ranks.admin"),
 	MODERATOR("ranks.moderator"),
-	HELPER("ranks.helper"),
-	BUILDER("ranks.builder"),
+	VIP("ranks.vip"),
 	DEFAULT("ranks.default");
 
 	private String permission;
