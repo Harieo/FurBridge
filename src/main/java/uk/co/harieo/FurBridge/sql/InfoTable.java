@@ -61,6 +61,13 @@ public class InfoTable {
 	}
 
 	/**
+	 * @return the assigned name of this table
+	 */
+	public String getTableName() {
+		return tableName;
+	}
+
+	/**
 	 * Gets an instance of {@link InfoTable} from the cache or creates on if it is not cached
 	 *
 	 * @param tableName of the table

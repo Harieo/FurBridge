@@ -11,6 +11,7 @@
     <properties>
         <maven.compiler.source>1.8</maven.compiler.source>
         <maven.compiler.target>1.8</maven.compiler.target>
+        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     </properties>
 
     <repositories>
@@ -30,14 +31,9 @@
         <dependency>
             <groupId>net.md-5</groupId>
             <artifactId>bungeecord-chat</artifactId>
-            <version>LATEST</version>
+            <version>1.12-SNAPSHOT</version>
             <scope>provided</scope>
             <type>jar</type>
-        </dependency>
-        <dependency>
-            <groupId>net.mcpz</groupId>
-            <artifactId>bungeecord-chat</artifactId>
-            <version>1.12-SNAPSHOT</version>
         </dependency>
         <dependency>
             <groupId>redis.clients</groupId>
