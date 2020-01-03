@@ -9,6 +9,9 @@ public abstract class ReloadPlayerInfoListener extends RedisListener {
 
 	private static final ImmutableList<String> listeningFor = ImmutableList.of(ReloadPlayerInfoMessage.MESSAGE_TYPE);
 
+	/**
+	 * An instance of {@link RedisListener} to listen for {@link ReloadPlayerInfoMessage}
+	 */
 	public ReloadPlayerInfoListener() {
 		super(listeningFor);
 	}
@@ -25,6 +28,11 @@ public abstract class ReloadPlayerInfoListener extends RedisListener {
 		}
 	}
 
+	/**
+	 * The method that is called when a message of the correct type is received
+	 *
+	 * @param uuidToReload received in the message
+	 */
 	public abstract void onReloadMessageReceived(UUID uuidToReload);
 
 }
