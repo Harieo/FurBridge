@@ -11,18 +11,24 @@ import redis.clients.jedis.JedisPoolConfig;
 
 public class RedisClient {
 
+	public static final String CHANNEL = "minecraft-network";
 	private static final String path = "/home/container/deployment-v2/redis.properties";
-	private static Properties properties;
-	private static JedisPool pool;
+	private static RedisClient instance;
+
+	private Properties properties;
+	private JedisPool pool;
+
+	private RedisClient() {
+		pool = createPool();
+		new RedisReceiver();
+
+		instance = this;
+	}
 
 	/**
 	 * @return the connection resource from the {@link JedisPool}
 	 */
-	public static Jedis getResource() {
-		if (pool == null) {
-			pool = createPool();
-		}
-
+	public Jedis getResource() {
 		return pool.getResource();
 	}
 
@@ -32,7 +38,7 @@ public class RedisClient {
 	 * @return the created instance
 	 * @throws RuntimeException if an error occurs on connection
 	 */
-	public static JedisPool createPool() throws RuntimeException {
+	public JedisPool createPool() throws RuntimeException {
 		try {
 			checkProperties();
 			return new JedisPool(new JedisPoolConfig(), properties.getProperty("host"),
@@ -50,7 +56,7 @@ public class RedisClient {
 	 * @throws RuntimeException if the configuration is invalid
 	 * @throws FileNotFoundException if the configuration does not exist
 	 */
-	private static void checkProperties() throws RuntimeException, FileNotFoundException {
+	private void checkProperties() throws RuntimeException, FileNotFoundException {
 		File file = new File(path);
 		if (file.exists()) {
 			try (FileReader reader = new FileReader(file)) {
@@ -75,7 +81,7 @@ public class RedisClient {
 	 * @param keys to be validated
 	 * @return whether all the keys were valid
 	 */
-	public static boolean checkForProperties(Properties properties, String... keys) {
+	public boolean checkForProperties(Properties properties, String... keys) {
 		for (String key : keys) {
 			if (!properties.contains(key)) {
 				return false;
@@ -83,6 +89,14 @@ public class RedisClient {
 		}
 
 		return true;
+	}
+
+	public static RedisClient instance() {
+		if (instance == null) {
+			instance = new RedisClient();
+		}
+
+		return instance;
 	}
 
 }

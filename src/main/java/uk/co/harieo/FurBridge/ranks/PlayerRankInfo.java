@@ -214,7 +214,7 @@ public class PlayerRankInfo extends InfoCore {
 	 */
 	public Rank getHeaviestRank() {
 		verifyInjection();
-		int highestWeight = 0;
+		/*int highestWeight = 0;
 		Rank heaviestRank = null;
 		for (Rank rank : ranks) {
 			int weight = rank.getWeight();
@@ -222,9 +222,11 @@ public class PlayerRankInfo extends InfoCore {
 				highestWeight = weight;
 				heaviestRank = rank;
 			}
-		}
+		}*/
 
-		return heaviestRank;
+		List<Rank> ranks = new ArrayList<>(this.ranks);
+		Collections.sort(ranks);
+		return ranks.get(ranks.size() - 1);
 	}
 
 	/**
