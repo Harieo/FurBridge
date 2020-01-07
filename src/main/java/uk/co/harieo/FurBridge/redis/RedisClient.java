@@ -5,6 +5,7 @@ import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
 import java.util.Properties;
+import java.util.concurrent.CompletableFuture;
 import redis.clients.jedis.Jedis;
 import redis.clients.jedis.JedisPool;
 import redis.clients.jedis.JedisPoolConfig;
@@ -18,15 +19,16 @@ public class RedisClient {
 	private Properties properties;
 	private JedisPool pool;
 
-	private RedisClient() {
-		pool = createPool();
-		new RedisReceiver();
+	private static RedisClient newInstance() {
+		RedisClient newInstance = new RedisClient();
+		System.out.println("Instantiation"); // TODO
+		newInstance.pool = newInstance.createPool();
 
-		instance = this;
+		return newInstance;
 	}
 
 	/**
-	 * @return the connection resource from the {@link JedisPool}
+	 * @return the connection resource from the {@link JedisPool} for subscribing
 	 */
 	public Jedis getResource() {
 		return pool.getResource();
@@ -41,9 +43,11 @@ public class RedisClient {
 	public JedisPool createPool() throws RuntimeException {
 		try {
 			checkProperties();
-			return new JedisPool(new JedisPoolConfig(), properties.getProperty("host"),
-					Integer.parseInt(properties.getProperty("port")), Integer.parseInt(properties.getProperty("timeout")),
-					properties.getProperty("password"), Integer.parseInt(properties.getProperty("database")),
+			JedisPoolConfig config = new JedisPoolConfig();
+			config.setMaxTotal(128);
+			return new JedisPool(config, properties.getProperty("host"),
+					Integer.parseInt(properties.getProperty("port").trim()), Integer.parseInt(properties.getProperty("timeout").trim()),
+					properties.getProperty("password"), Integer.parseInt(properties.getProperty("database").trim()),
 					"redis");
 		} catch (FileNotFoundException e) {
 			throw new RuntimeException(e);
@@ -83,7 +87,7 @@ public class RedisClient {
 	 */
 	public boolean checkForProperties(Properties properties, String... keys) {
 		for (String key : keys) {
-			if (!properties.contains(key)) {
+			if (!properties.containsKey(key)) {
 				return false;
 			}
 		}
@@ -93,7 +97,20 @@ public class RedisClient {
 
 	public static RedisClient instance() {
 		if (instance == null) {
-			instance = new RedisClient();
+			instance = newInstance();
+			if (instance.pool.isClosed()) {
+				System.out.println("Pool is closed"); // TODO
+			}
+			CompletableFuture.runAsync(() -> {
+				try (Jedis jedis = instance.getResource()) {
+					if (!jedis.isConnected()) {
+						System.out.println("Jedis is not connected"); // TODO
+					}
+					System.out.println("Attempting the subscription"); // TODO
+					jedis.subscribe(RedisReceiver.getInstance(), CHANNEL);
+					System.out.println("Subscribed the receiver to the channel"); // TODO
+				}
+			});
 		}
 
 		return instance;

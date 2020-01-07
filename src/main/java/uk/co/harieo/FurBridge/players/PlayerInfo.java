@@ -224,4 +224,13 @@ public class PlayerInfo {
 		});
 	}
 
+	/**
+	 * Deletes a player's loaded information from the cache so that it can be totally reloaded
+	 *
+	 * @param uuid to remove from the cache
+	 */
+	public static void invalidateCachedInfo(UUID uuid) {
+		CACHE.invalidate(uuid);
+	}
+
 }
