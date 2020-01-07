@@ -16,7 +16,7 @@ public class RedisReceiver extends JedisPubSub {
 	private List<RedisListener> listeners = new ArrayList<>();
 
 	@Override
-	public void onPMessage(String pattern, String channel, String message) {
+	public void onMessage(String channel, String message) {
 		System.out.println("Received message on channel " + channel + " with message:"); // TODO
 		System.out.println(message); // TODO
 		if (channel.equals(RedisClient.CHANNEL)) {

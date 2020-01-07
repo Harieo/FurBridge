@@ -5,32 +5,22 @@ import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
 import java.util.Properties;
-import java.util.concurrent.CompletableFuture;
 import redis.clients.jedis.Jedis;
 import redis.clients.jedis.JedisPool;
 import redis.clients.jedis.JedisPoolConfig;
 
 public class RedisClient {
 
-	public static final String CHANNEL = "minecraft-network";
+	public static final String CHANNEL = "minecraft";
 	private static final String path = "/home/container/deployment-v2/redis.properties";
-	private static RedisClient instance;
 
-	private Properties properties;
-	private JedisPool pool;
-
-	private static RedisClient newInstance() {
-		RedisClient newInstance = new RedisClient();
-		System.out.println("Instantiation"); // TODO
-		newInstance.pool = newInstance.createPool();
-
-		return newInstance;
-	}
+	private static Properties properties;
+	private static JedisPool pool = createPool();
 
 	/**
 	 * @return the connection resource from the {@link JedisPool} for subscribing
 	 */
-	public Jedis getResource() {
+	public static Jedis getResource() {
 		return pool.getResource();
 	}
 
@@ -40,7 +30,7 @@ public class RedisClient {
 	 * @return the created instance
 	 * @throws RuntimeException if an error occurs on connection
 	 */
-	public JedisPool createPool() throws RuntimeException {
+	public static JedisPool createPool() throws RuntimeException {
 		try {
 			checkProperties();
 			JedisPoolConfig config = new JedisPoolConfig();
@@ -60,7 +50,7 @@ public class RedisClient {
 	 * @throws RuntimeException if the configuration is invalid
 	 * @throws FileNotFoundException if the configuration does not exist
 	 */
-	private void checkProperties() throws RuntimeException, FileNotFoundException {
+	private static void checkProperties() throws RuntimeException, FileNotFoundException {
 		File file = new File(path);
 		if (file.exists()) {
 			try (FileReader reader = new FileReader(file)) {
@@ -85,7 +75,7 @@ public class RedisClient {
 	 * @param keys to be validated
 	 * @return whether all the keys were valid
 	 */
-	public boolean checkForProperties(Properties properties, String... keys) {
+	public static boolean checkForProperties(Properties properties, String... keys) {
 		for (String key : keys) {
 			if (!properties.containsKey(key)) {
 				return false;
@@ -93,27 +83,6 @@ public class RedisClient {
 		}
 
 		return true;
-	}
-
-	public static RedisClient instance() {
-		if (instance == null) {
-			instance = newInstance();
-			if (instance.pool.isClosed()) {
-				System.out.println("Pool is closed"); // TODO
-			}
-			CompletableFuture.runAsync(() -> {
-				try (Jedis jedis = instance.getResource()) {
-					if (!jedis.isConnected()) {
-						System.out.println("Jedis is not connected"); // TODO
-					}
-					System.out.println("Attempting the subscription"); // TODO
-					jedis.subscribe(RedisReceiver.getInstance(), CHANNEL);
-					System.out.println("Subscribed the receiver to the channel"); // TODO
-				}
-			});
-		}
-
-		return instance;
 	}
 
 }
