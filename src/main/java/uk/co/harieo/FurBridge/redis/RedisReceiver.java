@@ -17,8 +17,6 @@ public class RedisReceiver extends JedisPubSub {
 
 	@Override
 	public void onMessage(String channel, String message) {
-		System.out.println("Received message on channel " + channel + " with message:"); // TODO
-		System.out.println(message); // TODO
 		if (channel.equals(RedisClient.CHANNEL)) {
 			JsonObject json = parser.parse(message).getAsJsonObject();
 			String messageType = json.get(RedisMessage.messageTypeKey).getAsString();
