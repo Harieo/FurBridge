@@ -37,6 +37,7 @@ public class PlayerRankInfo extends InfoCore {
 		List<Integer> cachedRawRanks = cache.getIfPresent(getPlayerInfo().getPlayerId());
 		if (cachedRawRanks != null) {
 			rawRanks = cachedRawRanks;
+			injectModule();
 		} else {
 			try (Connection connection = FurDB.getConnection();
 					PreparedStatement statement = connection
@@ -227,7 +228,11 @@ public class PlayerRankInfo extends InfoCore {
 		verifyInjection();
 		List<Rank> ranks = new ArrayList<>(this.ranks);
 		Collections.sort(ranks);
-		return ranks.get(ranks.size() - 1);
+		if (!ranks.isEmpty()) {
+			return ranks.get(ranks.size() - 1);
+		} else {
+			throw new IllegalStateException("Call for heaviest rank when there are no ranks");
+		}
 	}
 
 	/**
