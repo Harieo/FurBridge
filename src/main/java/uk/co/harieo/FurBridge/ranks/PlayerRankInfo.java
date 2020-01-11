@@ -1,11 +1,14 @@
 package uk.co.harieo.FurBridge.ranks;
 
+import com.google.common.cache.Cache;
+import com.google.common.cache.CacheBuilder;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.*;
 import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.TimeUnit;
 import uk.co.harieo.FurBridge.ranks.modules.RankModule;
 import uk.co.harieo.FurBridge.sql.FurDB;
 import uk.co.harieo.FurBridge.sql.InfoCore;
@@ -16,13 +19,14 @@ import uk.co.harieo.FurBridge.sql.InfoTable;
  * database. This core should only be loaded if there is a valid {@link RankModule} because most methods will not
  * function without one.
  *
- * Make sure to always use {@link #injectModule()} before calling other methods or you will receive an
- * exception. On top of this, make sure you are not injecting a failed module or else you will experience major issues.
- *
+ * Make sure to always use {@link #injectModule()} before calling other methods or you will receive an exception. On top
+ * of this, make sure you are not injecting a failed module or else you will experience major issues.
  */
 public class PlayerRankInfo extends InfoCore {
 
 	private static RankModule rankModule;
+	private static Cache<Integer, List<Integer>> cache = CacheBuilder.newBuilder()
+			.expireAfterWrite(10, TimeUnit.MINUTES).build();
 
 	private List<Integer> rawRanks = new ArrayList<>(); // Rank ids that haven't been compared to a rank module
 	private List<Rank> ranks = new ArrayList<>();  // Ranks that have been pulled from a rank module
@@ -30,21 +34,28 @@ public class PlayerRankInfo extends InfoCore {
 
 	@Override
 	protected void load() {
-		try (Connection connection = FurDB.getConnection();
-				PreparedStatement statement = connection
-						.prepareStatement("SELECT rank_id FROM player_ranks WHERE player_id=?")) {
-			statement.setInt(1, getPlayerInfo().getPlayerId());
-			ResultSet result = statement.executeQuery();
+		List<Integer> cachedRawRanks = cache.getIfPresent(getPlayerInfo().getPlayerId());
+		if (cachedRawRanks != null) {
+			rawRanks = cachedRawRanks;
+		} else {
+			try (Connection connection = FurDB.getConnection();
+					PreparedStatement statement = connection
+							.prepareStatement("SELECT rank_id FROM player_ranks WHERE player_id=?")) {
+				statement.setInt(1, getPlayerInfo().getPlayerId());
+				ResultSet result = statement.executeQuery();
 
-			// Adds the raw rank ids in preparation for a rank module being provided
-			while (result.next()) {
-				rawRanks.add(result.getInt(1));
+				// Adds the raw rank ids in preparation for a rank module being provided
+				while (result.next()) {
+					rawRanks.add(result.getInt(1));
+				}
+
+				injectModule(); // Compare raw ranks to loaded ones
+				cache.put(getPlayerInfo().getPlayerId(), rawRanks); // Cache this to spare resources
+				RankCache.cache(getPlayerInfo().getUniqueId(), this);
+			} catch (SQLException e) {
+				e.printStackTrace();
+				setHasErrorOccurred(true);
 			}
-
-			injectModule(); // Compare raw ranks to loaded ones
-		} catch (SQLException e) {
-			e.printStackTrace();
-			setHasErrorOccurred(true);
 		}
 	}
 
