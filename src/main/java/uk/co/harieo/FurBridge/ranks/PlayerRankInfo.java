@@ -25,8 +25,6 @@ import uk.co.harieo.FurBridge.sql.InfoTable;
 public class PlayerRankInfo extends InfoCore {
 
 	private static RankModule rankModule;
-	private static Cache<Integer, List<Integer>> cache = CacheBuilder.newBuilder()
-			.expireAfterWrite(10, TimeUnit.MINUTES).build();
 
 	private List<Integer> rawRanks = new ArrayList<>(); // Rank ids that haven't been compared to a rank module
 	private List<Rank> ranks = new ArrayList<>();  // Ranks that have been pulled from a rank module
@@ -34,9 +32,9 @@ public class PlayerRankInfo extends InfoCore {
 
 	@Override
 	protected void load() {
-		List<Integer> cachedRawRanks = cache.getIfPresent(getPlayerInfo().getPlayerId());
-		if (cachedRawRanks != null) {
-			rawRanks = cachedRawRanks;
+		if (RankCache.isPresent(getPlayerInfo().getUniqueId())) {
+			PlayerRankInfo cachedInfo = RankCache.getIfPresent(getPlayerInfo().getUniqueId());
+			rawRanks = cachedInfo.getRawRanks();
 			injectModule();
 		} else {
 			try (Connection connection = FurDB.getConnection();
@@ -51,7 +49,6 @@ public class PlayerRankInfo extends InfoCore {
 				}
 
 				injectModule(); // Compare raw ranks to loaded ones
-				cache.put(getPlayerInfo().getPlayerId(), rawRanks); // Cache this to spare resources
 				RankCache.cache(getPlayerInfo().getUniqueId(), this);
 			} catch (SQLException e) {
 				e.printStackTrace();
@@ -155,7 +152,7 @@ public class PlayerRankInfo extends InfoCore {
 				statement.setInt(2, rank.getId());
 				statement.executeUpdate();
 
-				rawRanks.remove(rank.getId());
+				rawRanks.remove((Integer) rank.getId());
 				ranks.remove(rank);
 				return true;
 			} catch (SQLException e) {
@@ -170,6 +167,13 @@ public class PlayerRankInfo extends InfoCore {
 	 */
 	public List<Rank> getRanks() {
 		return ranks;
+	}
+
+	/**
+	 * @return a list of raw rank ids, not for use outside of this class
+	 */
+	private List<Integer> getRawRanks() {
+		return rawRanks;
 	}
 
 	/**

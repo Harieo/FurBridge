@@ -11,9 +11,9 @@ import uk.co.harieo.FurBridge.redis.messages.RedisMessage;
 public class RedisReceiver extends JedisPubSub {
 
 	private static RedisReceiver instance = new RedisReceiver();
+	private static List<RedisListener> listeners = new ArrayList<>();
 
 	private JsonParser parser = new JsonParser();
-	private List<RedisListener> listeners = new ArrayList<>();
 
 	@Override
 	public void onMessage(String channel, String message) {
@@ -37,7 +37,7 @@ public class RedisReceiver extends JedisPubSub {
 	 * @param listener to be registered
 	 */
 	public static void registerListener(RedisListener listener) {
-		instance.listeners.add(listener);
+		listeners.add(listener);
 	}
 
 	public static RedisReceiver getInstance() {
