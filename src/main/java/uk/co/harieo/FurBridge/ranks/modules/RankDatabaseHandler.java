@@ -49,7 +49,7 @@ public class RankDatabaseHandler {
 
 				statement.setString(2, longPrefix);
 				if (shortPrefix == null) {
-					statement.setNull(3, Types.VARCHAR);
+					statement.setString(3, toBeCreated.getLongPrefix());
 				} else {
 					statement.setString(3, toBeCreated.getShortPrefix());
 				}

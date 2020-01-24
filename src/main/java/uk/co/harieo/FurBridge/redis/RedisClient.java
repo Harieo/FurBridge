@@ -15,13 +15,21 @@ public class RedisClient {
 	private static final String path = "/home/container/deployment-v2/redis.properties";
 
 	private static Properties properties;
-	private static JedisPool pool = createPool();
+	private static JedisPool publishPool = createPool();
+	private static JedisPool subscribePool = createPool();
+
+	/**
+	 * @return the connection resource from the {@link JedisPool} for publishing
+	 */
+	public static Jedis getPublishResource() {
+		return publishPool.getResource();
+	}
 
 	/**
 	 * @return the connection resource from the {@link JedisPool} for subscribing
 	 */
-	public static Jedis getResource() {
-		return pool.getResource();
+	public static Jedis getSubscribeResource() {
+		return subscribePool.getResource();
 	}
 
 	/**

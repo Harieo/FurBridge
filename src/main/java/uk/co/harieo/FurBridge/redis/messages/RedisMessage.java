@@ -62,7 +62,7 @@ public abstract class RedisMessage {
 	 * Publishes this message to Redis by attaching the message body and publishing via {@link Jedis}
 	 */
 	public void publish() {
-		try (Jedis jedis = RedisClient.getResource()) {
+		try (Jedis jedis = RedisClient.getPublishResource()) {
 			messageJson.add(messageBodyKey,
 					messageBody); // Add before publish to make sure it has had time to edit the body
 			jedis.publish(RedisClient.CHANNEL, messageJson.toString());

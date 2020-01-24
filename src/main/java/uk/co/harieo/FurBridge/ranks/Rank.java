@@ -8,7 +8,7 @@ public class Rank implements Comparable<Rank> {
 	private int id; // Auto Increment id assigned by the database on creation
 	private String rankName; // Unique user-friendly id for front end handling
 	private String longPrefix; // Longer prefix to be used with a player
-	private String shortPrefix; // Optional shortened prefix to be used with a player
+	private String shortPrefix = null; // Optional shortened prefix to be used with a player
 	private int weight = 0; // The amount of weight this rank holds (more weight means more important)
 	private int parentRank = -1; // The id of this rank's parent, if it has any
 	private boolean isDefault = false; // Whether this rank is inherited by default
