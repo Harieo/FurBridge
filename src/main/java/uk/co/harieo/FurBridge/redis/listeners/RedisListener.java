@@ -1,12 +1,12 @@
 package uk.co.harieo.FurBridge.redis.listeners;
 
 import com.google.gson.JsonObject;
-import java.util.List;
+import java.util.Set;
 import uk.co.harieo.FurBridge.redis.RedisReceiver;
 
 public abstract class RedisListener {
 
-	private List<String> listeningFor;
+	private final Set<String> listeningFor;
 
 	/**
 	 * A custom listener of specified message types, which will have {@link #onMessage(String, int, JsonObject)} called
@@ -14,15 +14,15 @@ public abstract class RedisListener {
 	 *
 	 * @param toListenFor types of messages to listen for
 	 */
-	public RedisListener(List<String> toListenFor) {
+	public RedisListener(Set<String> toListenFor) {
 		this.listeningFor = toListenFor;
 		RedisReceiver.registerListener(this);
 	}
 
 	/**
-	 * @return a list of messages to listen for
+	 * @return a set of message types to listen for
 	 */
-	public List<String> listeningFor() {
+	public Set<String> listeningFor() {
 		return listeningFor;
 	}
 

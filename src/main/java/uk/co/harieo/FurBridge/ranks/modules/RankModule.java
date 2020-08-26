@@ -4,7 +4,9 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
@@ -24,11 +26,12 @@ public class RankModule {
 			+ "parent_rank int, is_default tinyint(1) not null DEFAULT 0");
 	public static final InfoTable PERMISSIONS_TABLE = InfoTable
 			.get("permission_nodes",
-					"rank_id int, permission varchar(128), allowed tinyint(1), FOREIGN KEY (rank_id) REFERENCES ranks(id)");
+					"rank_id int, permission varchar(128), allowed tinyint(1), forced tinyint(1), FOREIGN KEY (rank_id) REFERENCES ranks(id)");
 
-	private Map<String, Rank> loadedRanks = new HashMap<>();
+	private final Map<String, Rank> loadedRanks = new HashMap<>();
+	private final List<Rank> excludedRanks = new ArrayList<>();
 	private boolean wasLoadedSuccessfully = true;
-	private RankDatabaseHandler databaseHandler;
+	private final RankDatabaseHandler databaseHandler;
 
 	private RankModule() {
 		databaseHandler = new RankDatabaseHandler(this);
@@ -116,15 +119,15 @@ public class RankModule {
 	 * @param rank to retrieve permissions for
 	 * @return a list of all applicable permissions
 	 */
-	public Map<String, Boolean> getAllPermissions(Rank rank) {
+	public Map<String, PermissionNode> getAllPermissions(Rank rank) {
 		if (rank.getParentRankId() < 0) {
 			return rank.getPermissions();
 		} else {
-			Map<String, Boolean> permissions = new HashMap<>(rank.getPermissions()); // Adds the base rank's permissions
+			Map<String, PermissionNode> permissions = new HashMap<>(rank.getPermissions()); // Adds the base rank's permissions
 
 			Rank parent = getRank(rank.getParentRankId());
 			while (parent != null && parent.getId() >= 0) { // While the next parent exists
-				Map<String, Boolean> parentPermissions = parent.getPermissions();
+				Map<String, PermissionNode> parentPermissions = parent.getPermissions();
 				for (String permission : parentPermissions.keySet()) {
 					permissions.putIfAbsent(permission,
 							parentPermissions.get(permission)); // Add permission from current parent to list
@@ -132,8 +135,35 @@ public class RankModule {
 				parent = getRank(parent.getParentRankId()); // Move to the next rank
 			}
 
+			for (Rank loadedRank : getLoadedRanks().values()) { // Adds default rank permissions
+				if (loadedRank.isDefault()) {
+					permissions.putAll(loadedRank.getPermissions());
+				}
+			}
+
 			return permissions;
 		}
+	}
+
+	/**
+	 * Removes a rank from the list of loaded ranks and adds it to the list of excluded ranks, making it inert
+	 *
+	 * @param rank to be excluded
+	 */
+	public void exclude(Rank rank) {
+		if (wasLoadedSuccessfully()) {
+			loadedRanks.remove(rank.getRankName());
+			excludedRanks.add(rank);
+		} else {
+			throw new IllegalStateException("Cannot exclude until module is loaded");
+		}
+	}
+
+	/**
+	 * @return a list of all ranks which have been excluded
+	 */
+	public List<Rank> getExcludedRanks() {
+		return excludedRanks;
 	}
 
 	/**
@@ -192,17 +222,21 @@ public class RankModule {
 					// Add ranks to the list
 					module.loadedRanks.putIfAbsent(rank.getRankName(), rank);
 					// Adds the rank name as a permission so that it can be simply referenced via Spigot/BungeeCord
-					rank.getPermissions().put("ranks." + rank.getRankName(), true);
+					String rankNode = "ranks." + rank.getRankName();
+					rank.getPermissions().put(rankNode, new PermissionNode(rankNode, true, false));
 
 					// Load all the permission nodes that this rank owns
 					try (PreparedStatement permissionStatement = connection.prepareStatement(
-							"SELECT permission,allowed FROM " + PERMISSIONS_TABLE.getTableName() + " WHERE rank_id=?")) {
+							"SELECT permission,allowed,forced FROM " + PERMISSIONS_TABLE.getTableName() + " WHERE rank_id=?")) {
 						permissionStatement.setInt(1, rank.getId());
 						ResultSet permissionResult = permissionStatement.executeQuery();
 
 						while (permissionResult.next()) {
+							String node = permissionResult.getString(1);
+							boolean allow = permissionResult.getBoolean(2);
+							boolean force = permissionResult.getBoolean(3);
 							rank.getPermissions()
-									.putIfAbsent(permissionResult.getString(1), permissionResult.getBoolean(2));
+									.putIfAbsent(node, new PermissionNode(node, allow, force));
 						}
 					}
 

@@ -2,22 +2,20 @@ package uk.co.harieo.FurBridge.ranks;
 
 import java.util.HashMap;
 import java.util.Map;
+import net.md_5.bungee.api.ChatColor;
+import uk.co.harieo.FurBridge.ranks.modules.PermissionNode;
 
 public class Rank implements Comparable<Rank> {
 
 	private int id; // Auto Increment id assigned by the database on creation
-	private String rankName; // Unique user-friendly id for front end handling
+	private final String rankName; // Unique user-friendly id for front end handling
 	private String longPrefix; // Longer prefix to be used with a player
-	private String shortPrefix = null; // Optional shortened prefix to be used with a player
+	private String shortPrefix; // Optional shortened prefix to be used with a player
 	private int weight = 0; // The amount of weight this rank holds (more weight means more important)
 	private int parentRank = -1; // The id of this rank's parent, if it has any
 	private boolean isDefault = false; // Whether this rank is inherited by default
 
-	/*
-	This map is formatted as <Permission, Allow> where Allow is whether the permission is allowed or forbidden, setting
-	Allow to false essentially excludes the permission.
-	 */
-	private Map<String, Boolean> permissions = new HashMap<>();
+	private final Map<String, PermissionNode> permissions = new HashMap<>();
 
 	/**
 	 * Creates a rank with assigned id and name to be used to handle user permissions
@@ -57,7 +55,7 @@ public class Rank implements Comparable<Rank> {
 	}
 
 	public String getLongPrefix() {
-		return longPrefix;
+		return ChatColor.translateAlternateColorCodes('&', longPrefix);
 	}
 
 	public void setShortPrefix(String shortPrefix) {
@@ -66,9 +64,9 @@ public class Rank implements Comparable<Rank> {
 
 	public String getShortPrefix() {
 		if (shortPrefix == null) {
-			return longPrefix; // Long prefix can't be null and is assumed as fallback
+			return getLongPrefix(); // Long prefix can't be null and is assumed as fallback
 		} else {
-			return shortPrefix;
+			return ChatColor.translateAlternateColorCodes('&', shortPrefix);
 		}
 	}
 
@@ -100,7 +98,7 @@ public class Rank implements Comparable<Rank> {
 		isDefault = aDefault;
 	}
 
-	public Map<String, Boolean> getPermissions() {
+	public Map<String, PermissionNode> getPermissions() {
 		return permissions;
 	}
 

@@ -12,11 +12,11 @@ import redis.clients.jedis.JedisPoolConfig;
 public class RedisClient {
 
 	public static final String CHANNEL = "minecraft";
-	private static final String path = "/home/container/deployment-v2/redis.properties";
 
+	private static final String path = "/home/container/deployment-v2/redis.properties";
 	private static Properties properties;
-	private static JedisPool publishPool = createPool();
-	private static JedisPool subscribePool = createPool();
+	private static final JedisPool publishPool = createPool();
+	private static final JedisPool subscribePool = createPool();
 
 	/**
 	 * @return the connection resource from the {@link JedisPool} for publishing

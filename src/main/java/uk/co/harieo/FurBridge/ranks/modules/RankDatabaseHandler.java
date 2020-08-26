@@ -4,13 +4,17 @@ import java.sql.*;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 import java.util.function.Consumer;
 import uk.co.harieo.FurBridge.ranks.Rank;
 import uk.co.harieo.FurBridge.sql.FurDB;
 
 public class RankDatabaseHandler {
 
-	private RankModule module;
+	private static final ExecutorService executorService = Executors.newCachedThreadPool();
+
+	private final RankModule module;
 
 	RankDatabaseHandler(RankModule module) {
 		this.module = module;
@@ -49,7 +53,7 @@ public class RankDatabaseHandler {
 
 				statement.setString(2, longPrefix);
 				if (shortPrefix == null) {
-					statement.setString(3, toBeCreated.getLongPrefix());
+					statement.setNull(3, Types.VARCHAR);
 				} else {
 					statement.setString(3, toBeCreated.getShortPrefix());
 				}
@@ -74,7 +78,7 @@ public class RankDatabaseHandler {
 				e.printStackTrace();
 				return false;
 			}
-		});
+		}, executorService);
 	}
 
 	/**
@@ -119,7 +123,7 @@ public class RankDatabaseHandler {
 				e.printStackTrace();
 				return false;
 			}
-		});
+		}, executorService);
 	}
 
 	/**
@@ -130,7 +134,7 @@ public class RankDatabaseHandler {
 	 * @param isAllowed whether the permission is allowed or denied
 	 * @return whether the update was successful
 	 */
-	public CompletableFuture<Boolean> setPermissionNode(Rank toBeEdited, String permission, boolean isAllowed) {
+	public CompletableFuture<Boolean> setPermissionNode(Rank toBeEdited, String permission, boolean isAllowed, boolean forced) {
 		if (!module.wasLoadedSuccessfully()) {
 			throw new IllegalStateException("Attempted to handle a malfunctioning RankModule");
 		} else if (toBeEdited == null) {
@@ -142,26 +146,28 @@ public class RankDatabaseHandler {
 
 		return CompletableFuture.supplyAsync(() -> {
 			try (Connection connection = FurDB.getConnection()) {
-				Map<String, Boolean> permissions = toBeEdited.getPermissions();
+				Map<String, PermissionNode> permissions = toBeEdited.getPermissions();
 				String statementString;
 				Map<Integer, Object> parameters = new HashMap<>();
 
 				if (permissions.containsKey(finalPermission)) {
-					if (permissions.get(finalPermission) == isAllowed) {
+					if (permissions.get(finalPermission).isAllowed() == isAllowed && permissions.get(finalPermission).isForced() == forced) {
 						return false; // Everything is already as it should be, why is this call being made?
 					} else {
 						statementString = "UPDATE " + RankModule.PERMISSIONS_TABLE.getTableName()
-								+ " SET allowed=? WHERE rank_id=? AND permission=?";
+								+ " SET allowed=?, forced=? WHERE rank_id=? AND permission=?";
 						parameters.put(1, isAllowed);
-						parameters.put(2, toBeEdited.getId());
-						parameters.put(3, finalPermission);
+						parameters.put(2, forced);
+						parameters.put(3, toBeEdited.getId());
+						parameters.put(4, finalPermission);
 					}
 				} else {
 					statementString = "INSERT INTO " + RankModule.PERMISSIONS_TABLE.getTableName()
-							+ " (rank_id,permission,allowed) VALUES (?,?,?)";
+							+ " (rank_id,permission,allowed,forced) VALUES (?,?,?,?)";
 					parameters.put(1, toBeEdited.getId());
 					parameters.put(2, finalPermission);
 					parameters.put(3, isAllowed);
+					parameters.put(4, forced);
 				}
 
 				try (PreparedStatement statement = connection.prepareStatement(statementString)) {
@@ -180,9 +186,7 @@ public class RankDatabaseHandler {
 					}
 
 					// Make sure the cached value is absolutely correct
-					permissions.remove(finalPermission);
-					permissions.put(finalPermission, isAllowed);
-
+					permissions.put(finalPermission, new PermissionNode(finalPermission, isAllowed, forced));
 					statement.executeUpdate();
 					return true;
 				}
@@ -190,7 +194,7 @@ public class RankDatabaseHandler {
 				e.printStackTrace();
 				return false;
 			}
-		});
+		}, executorService);
 	}
 
 	/**
@@ -225,7 +229,7 @@ public class RankDatabaseHandler {
 				e.printStackTrace();
 				return false;
 			}
-		});
+		}, executorService);
 	}
 
 	/**
@@ -278,7 +282,7 @@ public class RankDatabaseHandler {
 				e.printStackTrace();
 				return false;
 			}
-		});
+		}, executorService);
 	}
 
 	/**
@@ -310,7 +314,7 @@ public class RankDatabaseHandler {
 				e.printStackTrace();
 				return false;
 			}
-		});
+		}, executorService);
 	}
 
 	/**
@@ -370,7 +374,7 @@ public class RankDatabaseHandler {
 				e.printStackTrace();
 				return false;
 			}
-		});
+		}, executorService);
 	}
 
 	/**

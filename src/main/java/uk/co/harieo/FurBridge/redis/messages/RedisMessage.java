@@ -12,11 +12,11 @@ public abstract class RedisMessage {
 	public static final String versionKey = "version";
 	public static final String messageBodyKey = "message";
 
-	private String messageType;
-	private int messageVersion;
+	private final String messageType;
+	private final int messageVersion;
 
-	private JsonObject messageJson; // The frame JSON with the main information
-	private JsonObject messageBody; // An encapsulated message to prevent overlapping primary data
+	private final JsonObject messageJson; // The frame JSON with the main information
+	private final JsonObject messageBody; // An encapsulated message to prevent overlapping primary data
 
 	/**
 	 * A message in JSON format to be sent over Redis for the purposes of being received and handled by a {@link RedisListener}

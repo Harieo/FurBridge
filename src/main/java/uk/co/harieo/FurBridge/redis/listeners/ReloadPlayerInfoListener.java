@@ -1,13 +1,13 @@
 package uk.co.harieo.FurBridge.redis.listeners;
 
-import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableSet;
 import com.google.gson.JsonObject;
 import java.util.UUID;
 import uk.co.harieo.FurBridge.redis.messages.ReloadPlayerInfoMessage;
 
 public abstract class ReloadPlayerInfoListener extends RedisListener {
 
-	private static final ImmutableList<String> listeningFor = ImmutableList.of(ReloadPlayerInfoMessage.MESSAGE_TYPE);
+	private static final ImmutableSet<String> listeningFor = ImmutableSet.of(ReloadPlayerInfoMessage.MESSAGE_TYPE);
 
 	/**
 	 * An instance of {@link RedisListener} to listen for {@link ReloadPlayerInfoMessage}
