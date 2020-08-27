@@ -73,7 +73,7 @@ public class PlayerRankInfo extends InfoCore {
      */
     public List<Rank> injectModule() {
         if (!rankModule.wasLoadedSuccessfully()) {
-            throw new IllegalArgumentException("Attempted to insert a malfunctioning rank module");
+            throw new IllegalArgumentException("Attempted to inject a malfunctioning rank module");
         }
 
         ranks.clear(); // Safety in-case of duplicate injection
@@ -261,8 +261,12 @@ public class PlayerRankInfo extends InfoCore {
     public Rank getHeaviestRank() {
         verifyInjection();
         List<Rank> ranks = new ArrayList<>(this.ranks);
-        Collections.sort(ranks);
-        return ranks.get(ranks.size() - 1);
+        if (ranks.isEmpty()) {
+            return null; // Has no ranks
+        } else {
+            Collections.sort(ranks);
+            return ranks.get(ranks.size() - 1);
+        }
     }
 
     /**
