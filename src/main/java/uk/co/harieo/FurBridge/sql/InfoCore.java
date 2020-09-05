@@ -3,9 +3,13 @@ package uk.co.harieo.FurBridge.sql;
 import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 import uk.co.harieo.FurBridge.players.PlayerInfo;
 
 public abstract class InfoCore implements DatabaseHandler {
+
+	private static final ExecutorService executorService = Executors.newCachedThreadPool();
 
 	private PlayerInfo playerInfo;
 	private boolean hasErrorOccurred;
@@ -89,7 +93,7 @@ public abstract class InfoCore implements DatabaseHandler {
 				e.printStackTrace();
 				throw new RuntimeException("Error occurred retrieving PlayerInfo for an InfoCore");
 			}
-		});
+		}, executorService);
 	}
 
 	/**
@@ -115,7 +119,7 @@ public abstract class InfoCore implements DatabaseHandler {
 				e.printStackTrace();
 				throw new RuntimeException("Error occurred instantiating an InfoCore");
 			}
-		});
+		}, executorService);
 	}
 
 }
