@@ -15,6 +15,8 @@ public class RedisReceiver extends JedisPubSub {
 
 	private final JsonParser parser = new JsonParser();
 
+	private RedisReceiver() { }
+
 	@Override
 	public void onMessage(String channel, String message) {
 		try {

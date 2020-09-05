@@ -9,7 +9,7 @@ import uk.co.harieo.FurBridge.players.PlayerInfo;
 
 public abstract class InfoCore implements DatabaseHandler {
 
-	private static ExecutorService executorService = Executors.newCachedThreadPool();
+	private static final ExecutorService executorService = Executors.newCachedThreadPool();
 
 	private PlayerInfo playerInfo;
 	private boolean hasErrorOccurred;
