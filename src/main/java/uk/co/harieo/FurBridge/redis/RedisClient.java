@@ -13,7 +13,7 @@ public class RedisClient {
 
 	public static final String CHANNEL = "minecraft";
 
-	private static final String path = "/home/container/deployment-v2/redis.properties";
+	private static final String path = "./deployment-v2/redis.properties";
 	private static Properties properties;
 	private static final JedisPool publishPool = createPool();
 	private static final JedisPool subscribePool = createPool();
@@ -72,7 +72,7 @@ public class RedisClient {
 				throw new RuntimeException("Failed to load Redis properties", e);
 			}
 		} else {
-			throw new FileNotFoundException("Failed to locate a redis.properties folder in " + path);
+			throw new FileNotFoundException("Failed to locate a redis.properties file at " + path);
 		}
 	}
 
